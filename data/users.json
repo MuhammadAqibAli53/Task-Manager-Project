@@ -1,0 +1,32 @@
+[
+	{
+		"id": "usr-1",
+		"name": "Amina Khan",
+		"role": "Product Designer",
+		"email": "amina.khan@example.com"
+	},
+	{
+		"id": "usr-2",
+		"name": "Daniel Brooks",
+		"role": "Frontend Engineer",
+		"email": "daniel.brooks@example.com"
+	},
+	{
+		"id": "usr-3",
+		"name": "Priya Patel",
+		"role": "Backend Engineer",
+		"email": "priya.patel@example.com"
+	},
+	{
+		"id": "usr-4",
+		"name": "Sofia Garcia",
+		"role": "QA Analyst",
+		"email": "sofia.garcia@example.com"
+	},
+	{
+		"id": "usr-5",
+		"name": "Marcus Lee",
+		"role": "Delivery Lead",
+		"email": "marcus.lee@example.com"
+	}
+]

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TaskMaster is a simple offline-first task board.">
+    <meta name="theme-color" content="#0f172a">
+    <title>TaskMaster</title>
+
+    <link rel="stylesheet" href="./assets/css/tokens.css">
+    <link rel="stylesheet" href="./assets/css/app.css">
+</head>
+<body>
+    <div class="layout">
+        <aside class="left-panel">
+            <div class="brand">
+                <span class="brand-badge">TM</span>
+                <div>
+                    <h1>TaskMaster</h1>
+                    <p>Work board</p>
+                </div>
+            </div>
+
+            <nav class="panel-nav">
+                <a class="panel-link panel-link--active" href="#dashboard">Dashboard</a>
+                <a class="panel-link" href="#board-view">Board</a>
+                <a class="panel-link" href="#tasks-panel">List</a>
+                <a class="panel-link" href="#analytics">Stats</a>
+            </nav>
+
+            <section class="panel-card">
+                <h2>Sync</h2>
+                <p class="status-pill status-pill--online" id="sync-status">Online</p>
+                <p class="panel-note">Changes queue while offline.</p>
+            </section>
+
+            <section class="panel-card">
+                <h2>View</h2>
+                <div class="saved-view" id="saved-view-summary">
+                    <span>Filters: none</span>
+                    <span>Sort: due date</span>
+                    <span>Mode: kanban</span>
+                </div>
+            </section>
+        </aside>
+
+        <main class="content" id="main-content">
+            <header class="page-header" id="dashboard">
+                <div>
+                    <p class="eyebrow">Task board</p>
+                    <h2>Dashboard</h2>
+                    <p class="page-copy">A compact offline-first board for daily work.</p>
+                </div>
+                <div class="header-actions">
+                    <button type="button" id="theme-toggle" class="btn btn-secondary">Theme</button>
+                    <button type="button" class="btn btn-primary" id="btn-new-task">New task</button>
+                </div>
+            </header>
+
+            <section class="stats-grid">
+                <article class="stat-card"><p class="stat-label">Open</p><strong id="summary-open">0</strong><span>Active work</span></article>
+                <article class="stat-card"><p class="stat-label">Due today</p><strong id="summary-due-today">0</strong><span>Needs attention</span></article>
+                <article class="stat-card"><p class="stat-label">Overdue</p><strong id="summary-overdue">0</strong><span>Past due</span></article>
+                <article class="stat-card"><p class="stat-label">Done</p><strong id="summary-completion">0%</strong><span>Finished tasks</span></article>
+            </section>
+
+            <section class="filter-bar">
+                <label class="search-box" for="task-search">
+                    <input id="task-search" type="search" placeholder="Search tasks" autocomplete="off">
+                </label>
+
+                <div class="filter-grid">
+                    <label><span class="label-text">Status</span><select id="filter-status" multiple><option value="backlog">Backlog</option><option value="in-progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></label>
+                    <label><span class="label-text">Priority</span><select id="filter-priority" multiple><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
+                    <label><span class="label-text">Assignee</span><select id="filter-assignee" multiple></select></label>
+                    <label><span class="label-text">Label</span><select id="filter-label" multiple></select></label>
+                    <label><span class="label-text">Due</span><select id="filter-due-state"><option value="all">All</option><option value="overdue">Overdue</option><option value="due-today">Due today</option><option value="upcoming">Upcoming</option><option value="completed">Completed</option></select></label>
+                    <label><span class="label-text">Sort</span><select id="sort-by"><option value="due-date">Due date</option><option value="priority">Priority</option><option value="created-at">Creation date</option><option value="title">Title</option></select></label>
+                </div>
+
+                <div class="filter-actions">
+                    <div class="view-toggle">
+                        <button type="button" class="btn btn-ghost" id="view-kanban">Kanban</button>
+                        <button type="button" class="btn btn-ghost" id="view-list">List</button>
+                    </div>
+                    <button type="button" class="btn btn-ghost" id="clear-filters">Clear</button>
+                </div>
+            </section>
+
+            <section class="workspace-grid" id="analytics">
+                <section class="stats-panel">
+                    <div class="section-head">
+                        <div>
+                            <p class="eyebrow">Stats</p>
+                            <h3>Board health</h3>
+                        </div>
+                        <button type="button" class="btn btn-ghost" id="refresh-analytics">Refresh</button>
+                    </div>
+                    <div class="stats-cards" id="analytics-cards">
+                        <article class="stats-card"><span>Status count</span><strong id="analytics-status-count">0</strong></article>
+                        <article class="stats-card"><span>Completion</span><strong id="analytics-completion">0%</strong></article>
+                        <article class="stats-card"><span>Average finish</span><strong id="analytics-average-time">0d</strong></article>
+                    </div>
+                </section>
+
+                <section class="board-panel" id="board-view">
+                    <div class="section-head">
+                        <div>
+                            <p class="eyebrow">Board</p>
+                            <h3>Workflow</h3>
+                        </div>
+                        <p class="help-text">Drag cards or change status in the form.</p>
+                    </div>
+
+                    <div class="board-columns" id="kanban-board">
+                        <section class="column" data-status="backlog">
+                            <div class="column-head"><div><h4>Backlog</h4><p>Planned</p></div><span class="count-pill" id="count-backlog">0</span></div>
+                            <div class="card-list" id="list-backlog"></div>
+                        </section>
+                        <section class="column" data-status="in-progress">
+                            <div class="column-head"><div><h4>In Progress</h4><p>Working</p></div><span class="count-pill" id="count-in-progress">0</span></div>
+                            <div class="card-list" id="list-in-progress"></div>
+                        </section>
+                        <section class="column" data-status="review">
+                            <div class="column-head"><div><h4>Review</h4><p>Needs feedback</p></div><span class="count-pill" id="count-review">0</span></div>
+                            <div class="card-list" id="list-review"></div>
+                        </section>
+                        <section class="column" data-status="done">
+                            <div class="column-head"><div><h4>Done</h4><p>Finished</p></div><span class="count-pill" id="count-done">0</span></div>
+                            <div class="card-list" id="list-done"></div>
+                        </section>
+                    </div>
+
+                    <section class="table-view is-hidden" id="tasks-panel">
+                        <div class="section-head">
+                            <div>
+                                <p class="eyebrow">List</p>
+                                <h3>Visible tasks</h3>
+                            </div>
+                            <p class="help-text">Useful on smaller screens.</p>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="task-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Task</th>
+                                        <th scope="col">Assignee</th>
+                                        <th scope="col">Priority</th>
+                                        <th scope="col">Due</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="task-table-body"></tbody>
+                            </table>
+                        </div>
+                    </section>
+                </section>
+            </section>
+
+            <section class="empty-view is-hidden" id="empty-state">
+                <h3>No tasks found</h3>
+                <p>Try clearing filters or add a new task.</p>
+                <button type="button" class="btn btn-primary" id="empty-create-task">Create task</button>
+            </section>
+
+            <section class="loading-view is-hidden" id="loading-state">
+                <div class="skeleton skeleton-title"></div>
+                <div class="skeleton skeleton-line"></div>
+                <div class="skeleton skeleton-line"></div>
+                <div class="skeleton skeleton-card"></div>
+            </section>
+
+            <section class="error-view is-hidden" id="error-state">
+                <h3>Load failed</h3>
+                <p id="error-message">Could not load tasks.</p>
+                <button type="button" class="btn btn-primary" id="retry-load">Try again</button>
+            </section>
+        </main>
+    </div>
+
+    <dialog id="task-dialog" class="dialog-box">
+        <form id="task-form" class="dialog-form" method="dialog" novalidate>
+            <header class="dialog-head">
+                <div>
+                    <p class="eyebrow">Task</p>
+                    <h2 id="task-dialog-title">New task</h2>
+                </div>
+                <button type="button" class="icon-button" data-close-dialog>×</button>
+            </header>
+
+            <input type="hidden" id="task-id" name="task-id">
+
+            <div class="form-grid">
+                <label class="field"><span>Title</span><input id="task-title" name="title" type="text" minlength="3" maxlength="100" required><small class="error-text" id="title-error"></small></label>
+                <label class="field field--full"><span>Description</span><textarea id="task-description" name="description" rows="5"></textarea><small class="error-text" id="description-error"></small></label>
+                <label class="field"><span>Priority</span><select id="task-priority" name="priority"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
+                <label class="field"><span>Assignee</span><select id="task-assignee" name="assignee"></select><small class="error-text" id="assignee-error"></small></label>
+                <label class="field"><span>Due date</span><input id="task-due-date" name="dueDate" type="date"><small class="error-text" id="due-date-error"></small></label>
+                <label class="field"><span>Status</span><select id="task-status" name="status"><option value="backlog">Backlog</option><option value="in-progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></label>
+                <label class="field field--full"><span>Labels</span><input id="task-labels" name="labels" type="text" placeholder="frontend, api"><small id="labels-help" class="help-text">Comma-separated labels.</small><small class="error-text" id="labels-error"></small></label>
+                <label class="field"><span>Created</span><input id="task-created-at" name="createdAt" type="date" readonly></label>
+            </div>
+
+            <footer class="dialog-foot">
+                <button type="button" class="btn btn-ghost" data-close-dialog>Cancel</button>
+                <button type="submit" class="btn btn-primary" id="task-save">Save</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog id="confirm-dialog" class="dialog-box dialog-box--confirm">
+        <form method="dialog" class="dialog-form">
+            <header class="dialog-head">
+                <div>
+                    <p class="eyebrow">Confirm</p>
+                    <h2 id="confirm-title">Delete task?</h2>
+                </div>
+                <button type="button" class="icon-button" data-close-dialog>×</button>
+            </header>
+            <p id="confirm-message">This cannot be undone.</p>
+            <footer class="dialog-foot">
+                <button type="button" class="btn btn-ghost" data-close-dialog>Cancel</button>
+                <button type="submit" class="btn btn-danger" id="confirm-action">Delete</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <div class="toast-area" id="toast-region"></div>
+
+    <template id="task-card-template">
+        <article class="task-card" draggable="true">
+            <header class="card-head">
+                <div>
+                    <p class="card-priority"></p>
+                    <h4 class="card-title"></h4>
+                </div>
+                <div class="card-menu-wrap">
+                    <button type="button" class="icon-button card-menu-toggle">⋯</button>
+                    <div class="card-menu-panel is-hidden">
+                        <button type="button" class="card-menu-item" data-action="edit">Edit</button>
+                        <button type="button" class="card-menu-item card-menu-item--danger" data-action="delete">Delete</button>
+                    </div>
+                </div>
+            </header>
+            <p class="card-text"></p>
+            <div class="card-meta"><span class="card-person"></span><span class="card-date"></span></div>
+            <div class="card-tags"></div>
+        </article>
+    </template>
+
+    
+
+    <script src="./js/step1.js"></script>
+</body>
+
+</html>
