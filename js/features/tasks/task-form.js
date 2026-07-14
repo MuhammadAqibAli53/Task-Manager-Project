@@ -1,53 +1,95 @@
-
+/**
+ * js/features/board/drag-drop.js
+ */
 import { store } from '../../core/store.js';
 
-export function initTaskForm() {
-   
-    const newTaskBtn = document.getElementById('btn-new-task');
-    const dialog = document.getElementById('task-dialog');
-    const closeBtns = document.querySelectorAll('[data-close-dialog]');
-    const form = document.getElementById('task-form');
+export function initDragAndDrop() {
+    
+    
+    const board = document.getElementById('kanban-board');
+    let draggedTaskId = null;
 
-
-    newTaskBtn.addEventListener('click', () => {
-        form.reset();
-        dialog.showModal(); 
+    board.addEventListener('dragstart', (event) => {
+        const card = event.target.closest('.task-card');
+        if (card) {
+            draggedTaskId = card.dataset.id;
+            card.style.opacity = '0.5'; 
+        }
     });
 
 
-    closeBtns.forEach(button => {
-        button.addEventListener('click', () => {
-            dialog.close();
-        });
+    board.addEventListener('dragend', (event) => {
+        const card = event.target.closest('.task-card');
+        if (card) {
+            card.style.opacity = '1'; 
+        }
+        draggedTaskId = null; 
     });
 
-    form.addEventListener('submit', (event) => {
-       
+
+    
+    board.addEventListener('dragover', (event) => {
         event.preventDefault(); 
-
-  
-  
-        const formData = new FormData(form);
- 
-        const currentTasks = store.get().tasks;
-      
- 
-        const newTask = {
-            id: 'task-' + crypto.randomUUID().split('-')[0],
-            title: formData.get('title'),
-            description: formData.get('description'),
-            priority: formData.get('priority'),
-            status: formData.get('status'),
-            assignee: formData.get('assignee') || 'Unassigned',
-            dueDate: formData.get('dueDate'),
-            createdAt: new Date().toISOString().split('T')[0] // Today's date
-        };
-
-
-        store.set({
-            tasks: [...currentTasks, newTask]
-        });
-
-        dialog.close();
     });
+
+    
+    board.addEventListener('drop', (event) => {
+        event.preventDefault();
+        
+        const targetColumn = event.target.closest('.column');
+        const card = document.querySelector(`[data-id="${draggedTaskId}"]`); 
+        
+        if (targetColumn && draggedTaskId && card) {
+            
+            const newStatus = targetColumn.dataset.status;
+            
+            const currentTasks = store.get().tasks;
+            
+            
+            const draggedTask = currentTasks.find(t => t.id === draggedTaskId);
+
+            // RULE 3: Cannot move to Done without an assignee
+            if (newStatus === 'done' && (draggedTask.assignee === 'Unassigned' || draggedTask.assignee.trim() === '')) {
+                showInlineCardError(card, 'Cannot complete: Assign someone first.');
+                return; // Kick them out, don't update the store!
+            }
+
+            // RULE 4: Cannot move to Review without a description
+            if (newStatus === 'review' && draggedTask.description.trim() === '') {
+                showInlineCardError(card, 'Cannot review: Add a description first.');
+                return; // Kick them out!
+            }
+            
+            // If it passes all rules, update the store like normal
+            const updatedTasks = currentTasks.map(task => {
+                if (task.id === draggedTaskId) {
+                    return { ...task, status: newStatus };
+                }
+                return task;
+            });
+            
+            store.set({ tasks: updatedTasks });
+        }
+    });
+
+    // --- HELPER FUNCTION: INLINE CARD ERRORS ---
+    function showInlineCardError(cardElement, message) {
+        // Prevent spamming multiple errors
+        if (cardElement.querySelector('.card-error-msg')) return;
+
+        const errorEl = document.createElement('div');
+        errorEl.className = 'card-error-msg';
+        errorEl.style.color = '#dc2626'; // Red text
+        errorEl.style.fontSize = '0.75rem';
+        errorEl.style.marginTop = '8px';
+        errorEl.style.fontWeight = 'bold';
+        errorEl.textContent = `⚠ ${message}`;
+
+        cardElement.appendChild(errorEl);
+
+        // Remove the error automatically after 3 seconds
+        setTimeout(() => {
+            errorEl.remove();
+        }, 3000);
+    }
 }

@@ -71,7 +71,7 @@
                 </label>
 
                 <div class="filter-grid">
-                    <label><span class="label-text">Status</span><select id="filter-status" multiple><option value="backlog">Backlog</option><option value="in-progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></label>
+                    <label><span class="label-text">Status</span><select id="filter-status" multiple><option value="">All</option><option value="backlog">Backlog</option><option value="in-progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></label>
                     <label><span class="label-text">Priority</span><select id="filter-priority" multiple><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
                     <label><span class="label-text">Assignee</span><select id="filter-assignee" multiple></select></label>
                     <label><span class="label-text">Label</span><select id="filter-label" multiple></select></label>
@@ -193,14 +193,60 @@
             <input type="hidden" id="task-id" name="task-id">
 
             <div class="form-grid">
-                <label class="field"><span>Title</span><input id="task-title" name="title" type="text" minlength="3" maxlength="100" required><small class="error-text" id="title-error"></small></label>
-                <label class="field field--full"><span>Description</span><textarea id="task-description" name="description" rows="5"></textarea><small class="error-text" id="description-error"></small></label>
-                <label class="field"><span>Priority</span><select id="task-priority" name="priority"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
-                <label class="field"><span>Assignee</span><select id="task-assignee" name="assignee"></select><small class="error-text" id="assignee-error"></small></label>
-                <label class="field"><span>Due date</span><input id="task-due-date" name="dueDate" type="date"><small class="error-text" id="due-date-error"></small></label>
-                <label class="field"><span>Status</span><select id="task-status" name="status"><option value="backlog">Backlog</option><option value="in-progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></label>
-                <label class="field field--full"><span>Labels</span><input id="task-labels" name="labels" type="text" placeholder="frontend, api"><small id="labels-help" class="help-text">Comma-separated labels.</small><small class="error-text" id="labels-error"></small></label>
-                <label class="field"><span>Created</span><input id="task-created-at" name="createdAt" type="date" readonly></label>
+                <label class="field">
+                    <span>Title</span>
+                    <input id="task-title" name="title" type="text" minlength="3" maxlength="100" required>
+                    <small class="error-text" id="error-title" style="color: red; display: block; margin-top: 4px;"></small>
+                </label>
+                
+                <label class="field field--full">
+                    <span>Description</span>
+                    <textarea id="task-description" name="description" rows="5"></textarea>
+                    <small class="error-text" id="description-error"></small>
+                </label>
+                
+                <label class="field">
+                    <span>Priority</span>
+                    <select id="task-priority" name="priority">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </label>
+                
+                <label class="field">
+                    <span>Assignee</span>
+                    <select id="task-assignee" name="assignee"></select>
+                    <small class="error-text" id="assignee-error"></small>
+                </label>
+                
+                <label class="field">
+                    <span>Due date</span>
+                    <input id="task-due-date" name="dueDate" type="date">
+                    <small class="error-text" id="error-date" style="color: red; display: block; margin-top: 4px;"></small>
+                </label>
+                
+                <label class="field">
+                    <span>Status</span>
+                    <select id="task-status" name="status">
+                        <option value="backlog">Backlog</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="review">Review</option>
+                        <option value="done">Done</option>
+                    </select>
+                </label>
+                
+                <label class="field field--full">
+                    <span>Labels</span>
+                    <input id="task-labels" name="labels" type="text" placeholder="frontend, api">
+                    <small id="labels-help" class="help-text">Comma-separated labels.</small>
+                    <small class="error-text" id="labels-error"></small>
+                </label>
+                
+                <label class="field">
+                    <span>Created</span>
+                    <input id="task-created-at" name="createdAt" type="date" readonly>
+                </label>
             </div>
 
             <footer class="dialog-foot">
@@ -209,6 +255,7 @@
             </footer>
         </form>
     </dialog>
+    
 
     <dialog id="confirm-dialog" class="dialog-box dialog-box--confirm">
         <form method="dialog" class="dialog-form">
@@ -252,7 +299,7 @@
 
     
 
-    <script src="./js/step1.js"></script>
+    <script type="module" src="./js/app1.js"></script>
 </body>
 
 </html>

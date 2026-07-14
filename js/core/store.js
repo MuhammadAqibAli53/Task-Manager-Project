@@ -1,51 +1,64 @@
 /**
  * js/core/store.js
- * A simple place to keep our app data and tell the screen when it changes.
  */
 
 class Store {
     constructor() {
-        // 1. THE DATA: This is just a plain object holding our app's information.
+        // --- NEW: 1. Check for saved preferences ---
+        // Go to LocalStorage, grab the saved string, and parse it back into a JavaScript object.
+        // If there is nothing saved yet, default to an empty object (|| {}).
+        const savedPrefs = JSON.parse(localStorage.getItem('taskMasterPrefs')) || {};
+
         this.data = {
             tasks: [],
-            isLoading: true
+            isLoading: true,
+            
+            // --- NEW: 2. Load saved data, or use defaults ---
+            filters: savedPrefs.filters || {
+                search: '',
+                status: [],
+                priority: [],
+                assignee: [],
+                label: [],
+                dueState: 'all'
+            },
+            sort: savedPrefs.sort || 'due-date',
+            viewMode: savedPrefs.viewMode || 'kanban',
+            theme: savedPrefs.theme || 'light' 
         };
 
-        // 2. THE WATCHERS: A list of functions (like our UI components) 
-        // that want to be notified whenever the data changes.
         this.watchers = [];
     }
 
-    /**
-     * Read the current data.
-     */
     get() {
         return this.data;
     }
 
-    /**
-     * Add a watcher (a component that says "Tell me when data changes!")
-     */
     watch(watcherFunction) {
         this.watchers.push(watcherFunction);
     }
 
-    /**
-     * Change the data and tell the watchers about it.
-     */
     set(newData) {
-        // Combine the old data with the new data
         this.data = { 
             ...this.data, 
             ...newData 
         };
 
-        // Shout it out! Loop through every watcher and give them the new data.
+
+        const preferencesToSave = {
+            filters: this.data.filters,
+            sort: this.data.sort,
+            viewMode: this.data.viewMode,
+            theme: this.data.theme
+        };
+        
+        // Convert the object to a string and save it to the browser
+        localStorage.setItem('taskMasterPrefs', JSON.stringify(preferencesToSave));
+
         this.watchers.forEach(watcher => {
             watcher(this.data);
         });
     }
 }
 
-// Export one single store that the whole app shares
 export const store = new Store();
