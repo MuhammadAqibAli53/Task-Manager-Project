@@ -47,6 +47,10 @@ class SyncService {
     setupListeners() {
         window.addEventListener('online', async () => {
             this.isOnline = true;
+            
+            // 1. Instantly clear the offline toast!
+            eventBus.emit('notification:clear'); 
+            
             this.updateStatusDisplay('Syncing...');
             eventBus.emit('sync:started');
             await this.processQueue();
@@ -55,9 +59,11 @@ class SyncService {
         window.addEventListener('offline', () => {
             this.isOnline = false;
             this.updateStatusDisplay('Offline');
+            
             eventBus.emit('notification:show', {
                 message: 'You are offline. Changes are saved locally and queued.',
-                type: 'warning'
+                type: 'warning',
+                duration: 0 // 2. Duration 0 keeps it on screen until they reconnect!
             });
         });
     }
@@ -118,12 +124,27 @@ class SyncService {
                 message: 'All offline operations synchronized successfully!',
                 type: 'success'
             });
+            setTimeout(() => {
+                if (this.isOnline) {
+                    this.updateStatusDisplay('Online');
+                }
+            }, 3000);
 
         } catch (error) {
             console.error('Synchronization failed:', error);
             this.updateStatusDisplay('Sync Failed');
             eventBus.emit('sync:failed', error);
             // Notice: We do NOT clear the queue here. We let the data stay safe in IndexedDB to try again later!
+
+            if (this.isOnline) {
+                console.log("Server failed. Retrying sync in 5 seconds...");
+                
+                setTimeout(() => {
+                    // Change status back to syncing so the user knows it's trying again
+                    this.updateStatusDisplay('Syncing...'); 
+                    this.processQueue();
+                }, 5000);
+            }
         }
     }
 

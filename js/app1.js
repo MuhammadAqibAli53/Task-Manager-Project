@@ -1,3 +1,6 @@
+/**
+ * js/app1.js
+ */
 import { store } from './core/store.js';
 import { fetchInitialTasks } from './services/api-client.js';
 import { initTaskForm } from './features/tasks/task-form.js';
@@ -9,6 +12,8 @@ import { loadTasksFromDB, saveTasksToDB } from './services/db.js';
 import { initTaskActions } from './features/tasks/task-action.js';
 import { initUndoRedo } from './features/history/undo-redo.js';
 import { syncService } from './services/sync-service.js';
+import { initToastSystem } from './features/ui/toast.js';
+import { initRouter } from './core/router.js'; // <-- 1. IMPORT THE ROUTER
 
 
 // 1. Grab the template from your HTML
@@ -65,6 +70,7 @@ function renderBoard(tasks) {
 }
 
 async function initApp() {
+    initRouter(); // <-- 2. INITIALIZE THE ROUTER FIRST
     initThemeToggle();
     await initTaskForm();
     initDragAndDrop();
@@ -72,22 +78,20 @@ async function initApp() {
     initViewToggle();
     initTaskActions();
     initUndoRedo();
+    initToastSystem();
     await syncService.init();
 
-    // --- NEW: INITIALIZE THE WEB WORKER ---
+    // --- WEB WORKER INITIALIZATION ---
     const analyticsWorker = new Worker('./js/workers/analytics.worker.js');
     
-    // Listen for the math results coming back from the background thread
     analyticsWorker.onmessage = (event) => {
         const stats = event.data;
         
-        // Update the Heavy Summary Cards
         const overdueEl = document.getElementById('summary-overdue');
         const completionEl = document.getElementById('summary-completion');
         if (overdueEl) overdueEl.textContent = stats.overdueCount;
         if (completionEl) completionEl.textContent = `${stats.completionPercent}%`;
 
-        // Update the Board Health Analytics
         const healthStatusCount = document.getElementById('analytics-status-count');
         const healthCompletion = document.getElementById('analytics-completion');
         const healthAvgTime = document.getElementById('analytics-average-time');
@@ -96,21 +100,17 @@ async function initApp() {
         if (healthCompletion) healthCompletion.textContent = `${stats.completionPercent}%`;
         if (healthAvgTime) healthAvgTime.textContent = stats.averageTime;
     };
-    // --------------------------------------
 
-    // Make the Refresh button manually trigger a re-calculation
     const refreshBtn = document.getElementById('refresh-analytics');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', () => {
-            store.setState({}); // Changed to setState
+            store.setState({}); 
         });
     }
 
-    // Changed to subscribe()
     store.subscribe((data) => {
         saveTasksToDB(data.tasks);
         
-        // Hand the entire task array to the Web Worker to do the heavy math
         analyticsWorker.postMessage(data.tasks);
 
         const filters = data.filters;
@@ -146,19 +146,17 @@ async function initApp() {
             }
         });
 
-        // 3. LIGHTWEIGHT UI UPDATES (Fast math kept on main thread)
+        // 3. LIGHTWEIGHT UI UPDATES
         const today = new Date().toISOString().split('T')[0];
         
         document.getElementById('summary-open').textContent = data.tasks.filter(t => t.status !== 'done').length;
         document.getElementById('summary-due-today').textContent = data.tasks.filter(t => t.dueDate === today && t.status !== 'done').length;
 
-        // Column Counters 
         document.getElementById('count-backlog').textContent = filteredTasks.filter(t => t.status === 'backlog').length;
         document.getElementById('count-in-progress').textContent = filteredTasks.filter(t => t.status === 'in-progress').length;
         document.getElementById('count-review').textContent = filteredTasks.filter(t => t.status === 'review').length;
         document.getElementById('count-done').textContent = filteredTasks.filter(t => t.status === 'done').length;
 
-        // Sidebar View Summary
         const activeFilters = [];
         if (filters.search) activeFilters.push(`"${filters.search}"`);
         if (filters.status.length) activeFilters.push(filters.status.join(', '));
@@ -198,7 +196,6 @@ async function initApp() {
         initialTasks = await fetchInitialTasks();
     }
 
-    // Changed to setState()
     store.setState({
         tasks: initialTasks,
         isLoading: false
