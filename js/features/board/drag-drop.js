@@ -2,6 +2,7 @@
  * js/features/board/drag-drop.js
  */
 import { store } from '../../core/store.js';
+import { syncService } from '../../services/sync-service.js';
 
 export function initDragAndDrop() {
     const board = document.getElementById('kanban-board');
@@ -23,11 +24,11 @@ export function initDragAndDrop() {
         draggedTaskId = null; 
     });
 
-    board.addEventListener('dragover', (event) => {
+    board.addEventListener('dragover',(event) => {
         event.preventDefault(); 
     });
 
-    board.addEventListener('drop', (event) => {
+    board.addEventListener('drop', async (event) => {
         event.preventDefault();
         
         const targetColumn = event.target.closest('.column');
@@ -35,7 +36,7 @@ export function initDragAndDrop() {
         
         if (targetColumn && draggedTaskId && card) {
             const newStatus = targetColumn.dataset.status;
-            const currentTasks = store.get().tasks;
+            const currentTasks = store.getState().tasks;
             
             // Find the actual task object from the database
             const draggedTask = currentTasks.find(t => t.id === draggedTaskId);
@@ -45,22 +46,30 @@ export function initDragAndDrop() {
                 showInlineCardError(card, 'Cannot complete: Assign someone first.');
                 return;
             }
-
         
+            // RULE 4: Cannot review without a description
             if (newStatus === 'review' && draggedTask.description.trim() === '') {
                 showInlineCardError(card, 'Cannot review: Add a description first.');
                 return; 
             }
             
-      
+            // Create the updated task object
+            const updatedTaskData = { ...draggedTask, status: newStatus };
+
             const updatedTasks = currentTasks.map(task => {
                 if (task.id === draggedTaskId) {
-                    return { ...task, status: newStatus };
+                    return updatedTaskData;
                 }
                 return task;
             });
             
-            store.set({ tasks: updatedTasks });
+            // 1. Optimistic Update: Instantly render to the local UI
+            store.setState({ tasks: updatedTasks });
+
+            // 2. Sync Queue: If offline, safely log the action in IndexedDB
+            if (!navigator.onLine) {
+                await syncService.queueOperation('MOVE_TASK', updatedTaskData);
+            }
         }
     });
 

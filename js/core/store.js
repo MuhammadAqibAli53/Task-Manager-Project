@@ -1,64 +1,73 @@
 /**
  * js/core/store.js
+ * Centralized, immutable state management.
  */
 
-class Store {
-    constructor() {
-        // --- NEW: 1. Check for saved preferences ---
-        // Go to LocalStorage, grab the saved string, and parse it back into a JavaScript object.
-        // If there is nothing saved yet, default to an empty object (|| {}).
-        const savedPrefs = JSON.parse(localStorage.getItem('taskMasterPrefs')) || {};
+// 1. Check for saved UI preferences
+const savedPrefs = JSON.parse(localStorage.getItem('taskMasterPrefs')) || {};
 
-        this.data = {
-            tasks: [],
-            isLoading: true,
-            
-            // --- NEW: 2. Load saved data, or use defaults ---
-            filters: savedPrefs.filters || {
-                search: '',
-                status: [],
-                priority: [],
-                assignee: [],
-                label: [],
-                dueState: 'all'
-            },
-            sort: savedPrefs.sort || 'due-date',
-            viewMode: savedPrefs.viewMode || 'kanban',
-            theme: savedPrefs.theme || 'light' 
-        };
+// 2. Initial application state
+let state = {
+    tasks: [],
+    isLoading: true,
+    filters: savedPrefs.filters || {
+        search: '',
+        status: [],
+        priority: [],
+        assignee: [],
+        label: [],
+        dueState: 'all'
+    },
+    sort: savedPrefs.sort || 'due-date',
+    viewMode: savedPrefs.viewMode || 'kanban',
+    theme: savedPrefs.theme || 'light' 
+};
 
-        this.watchers = [];
-    }
+// 3. Array to hold all our listener functions
+const subscribers = new Set();
 
-    get() {
-        return this.data;
-    }
+export const store = {
+    // Return a deeply cloned copy to prevent direct global variable modification
+    getState: () => {
+        return structuredClone(state);
+    },
 
-    watch(watcherFunction) {
-        this.watchers.push(watcherFunction);
-    }
-
-    set(newData) {
-        this.data = { 
-            ...this.data, 
-            ...newData 
-        };
-
-
-        const preferencesToSave = {
-            filters: this.data.filters,
-            sort: this.data.sort,
-            viewMode: this.data.viewMode,
-            theme: this.data.theme
-        };
+    // Accept either a partial object OR a function (updater) for immutable updates
+    setState: (updater) => {
+        let newState;
         
-        // Convert the object to a string and save it to the browser
-        localStorage.setItem('taskMasterPrefs', JSON.stringify(preferencesToSave));
+        if (typeof updater === 'function') {
+            newState = updater(state);
+        } else {
+            newState = { ...state, ...updater };
+        }
 
-        this.watchers.forEach(watcher => {
-            watcher(this.data);
-        });
+        // Only notify if the state actually changed
+        if (JSON.stringify(state) !== JSON.stringify(newState)) {
+            state = Object.freeze(newState); // Enforce immutability
+            
+            // Save preferences to local storage so they survive a refresh
+            const preferencesToSave = {
+                filters: state.filters,
+                sort: state.sort,
+                viewMode: state.viewMode,
+                theme: state.theme
+            };
+            localStorage.setItem('taskMasterPrefs', JSON.stringify(preferencesToSave));
+            
+            // Notify subscribers only AFTER successful state change
+            subscribers.forEach(listener => listener(state));
+        }
+    },
+
+    // Add a listener
+    subscribe: (listener) => {
+        subscribers.add(listener);
+        return () => subscribers.delete(listener);
+    },
+
+    // Remove a listener
+    unsubscribe: (listener) => {
+        subscribers.delete(listener);
     }
-}
-
-export const store = new Store();
+};

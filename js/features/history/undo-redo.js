@@ -11,7 +11,7 @@ export function initUndoRedo() {
     let isNavigatingHistory = false;
 
 
-    store.watch((data) => {
+    store.subscribe((data) => {
 
         if (isNavigatingHistory) {
             isNavigatingHistory = false; 
@@ -64,7 +64,7 @@ export function initUndoRedo() {
 
             // Update the store! (Turn on the security lock first)
             isNavigatingHistory = true;
-            store.set({ tasks: previousTasks });
+            store.setState({ tasks: previousTasks });
         }
     }
 
@@ -81,7 +81,7 @@ export function initUndoRedo() {
 
             // Update the store!
             isNavigatingHistory = true;
-            store.set({ tasks: nextTasks });
+            store.setState({ tasks: nextTasks });
         }
     }
 }

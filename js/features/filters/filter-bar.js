@@ -1,65 +1,84 @@
+/**
+ * js/features/filters/filter-bar.js
+ */
 import { store } from '../../core/store.js';
 
-export function initFilterBar() {
 
+export async function initFilterBar() {
     const searchInput = document.getElementById('task-search');
     const clearfilter = document.getElementById('clear-filters');
     let Timer;
-    
 
-if (clearfilter) {
-   clearfilter.addEventListener('click', (e) => {
-      
-        if (searchInput) searchInput.value = '';
+    // 2. FETCH THE JSON FILE (Adjust this path if your data folder is somewhere else!)
+    try {
+        const response = await fetch('./data/users.json'); 
+        const users = await response.json();
 
-        const filterTypes = ['status', 'priority', 'assignee', 'label'];
-        filterTypes.forEach(filterName => {
-            const selectElement = document.getElementById(`filter-${filterName}`);
-            if (selectElement) {
-                 Array.from(selectElement.options).forEach(option => {
-                    option.selected = false;
-                });
-            }
-        });
-
-        
-        const sortSelect = document.getElementById('sort-by');
-        if (sortSelect) sortSelect.value = 'due-date';
-
-
-        store.set({
-            filters: {
-                search: '',
-                status: [],
-                priority: [],
-                assignee: [],
-                label: [],
-                dueState: 'all'
-            },
-            sort: 'due-date'
-        });
-    });
-} else {
-    console.error("Could not find the 'clear-filters' button in the HTML.");
-}
-
-
-    searchInput.addEventListener('input', (event) => {
-        clearTimeout(Timer);
-        Timer = setTimeout(() => {
-
-
-            const searchTerm = event.target.value.toLowerCase();
-
-            const currentFilters = store.get().filters;
-
-            store.set({
-                filters: { ...currentFilters, search: searchTerm }
+        // 3. DYNAMICALLY POPULATE THE ASSIGNEE DROPDOWN
+        const assigneeSelect = document.getElementById('filter-assignee');
+        if (assigneeSelect) {
+            assigneeSelect.innerHTML = ''; 
+            
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.name;        
+                option.textContent = user.name;  
+                assigneeSelect.appendChild(option);
             });
-        }, 300);
-    });
+        }
+    } catch (error) {
+        console.error("Could not load users.json:", error);
+    }
 
 
+    // 2. THE CLEAR BUTTON LOGIC
+    if (clearfilter) {
+        clearfilter.addEventListener('click', (e) => {
+            if (searchInput) searchInput.value = '';
+
+            const filterTypes = ['status', 'priority', 'assignee', 'label'];
+            filterTypes.forEach(filterName => {
+                const selectElement = document.getElementById(`filter-${filterName}`);
+                if (selectElement) {
+                    Array.from(selectElement.options).forEach(option => {
+                        option.selected = false;
+                    });
+                }
+            });
+
+            const sortSelect = document.getElementById('sort-by');
+            if (sortSelect) sortSelect.value = 'due-date';
+
+            store.setState({
+                filters: {
+                    search: '',
+                    status: [],
+                    priority: [],
+                    assignee: [],
+                    label: [],
+                    dueState: 'all'
+                },
+                sort: 'due-date'
+            });
+        });
+    }
+
+    // 3. THE SEARCH BAR LOGIC
+    if (searchInput) {
+        searchInput.addEventListener('input', (event) => {
+            clearTimeout(Timer);
+            Timer = setTimeout(() => {
+                const searchTerm = event.target.value.toLowerCase();
+                const currentFilters = store.getState().filters;
+
+                store.setState({
+                    filters: { ...currentFilters, search: searchTerm }
+                });
+            }, 300);
+        });
+    }
+
+    // 4. THE DROPDOWN FILTER LOGIC (Handles Status, Priority, Assignee, Label)
     const filterTypes = ['status', 'priority', 'assignee', 'label'];
 
     filterTypes.forEach(filterName => {
@@ -67,13 +86,10 @@ if (clearfilter) {
 
         if (selectElement) {
             selectElement.addEventListener('change', (event) => {
-
-
                 const selectedValues = Array.from(event.target.selectedOptions).map(option => option.value);
+                const currentFilters = store.getState().filters;
 
-                const currentFilters = store.get().filters;
-
-                store.set({
+                store.setState({
                     filters: {
                         ...currentFilters,
                         [filterName]: selectedValues
@@ -83,12 +99,11 @@ if (clearfilter) {
         }
     });
 
-   
+    // 5. THE SORTING LOGIC
     const sortSelect = document.getElementById('sort-by');
     if (sortSelect) {
         sortSelect.addEventListener('change', (event) => {
-            // Update the sort state in the store
-            store.set({
+            store.setState({
                 sort: event.target.value
             });
         });

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
     <link rel="stylesheet" href="./assets/css/tokens.css">
     <link rel="stylesheet" href="./assets/css/app.css">
 </head>
+
 <body>
     <div class="layout">
         <aside class="left-panel">
@@ -28,12 +30,17 @@
                 <a class="panel-link" href="#tasks-panel">List</a>
                 <a class="panel-link" href="#analytics">Stats</a>
             </nav>
-
             <section class="panel-card">
                 <h2>Sync</h2>
                 <p class="status-pill status-pill--online" id="sync-status">Online</p>
                 <p class="panel-note">Changes queue while offline.</p>
+
+                <div id="offline-queue-log"
+                    style="margin-top: 15px; font-size: 13px; max-height: 150px; overflow-y: auto;">
+                    <span style="color: gray;">No pending offline actions.</span>
+                </div>
             </section>
+
 
             <section class="panel-card">
                 <h2>View</h2>
@@ -59,10 +66,19 @@
             </header>
 
             <section class="stats-grid">
-                <article class="stat-card"><p class="stat-label">Open</p><strong id="summary-open">0</strong><span>Active work</span></article>
-                <article class="stat-card"><p class="stat-label">Due today</p><strong id="summary-due-today">0</strong><span>Needs attention</span></article>
-                <article class="stat-card"><p class="stat-label">Overdue</p><strong id="summary-overdue">0</strong><span>Past due</span></article>
-                <article class="stat-card"><p class="stat-label">Done</p><strong id="summary-completion">0%</strong><span>Finished tasks</span></article>
+                <article class="stat-card">
+                    <p class="stat-label">Open</p><strong id="summary-open">0</strong><span>Active work</span>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-label">Due today</p><strong id="summary-due-today">0</strong><span>Needs
+                        attention</span>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-label">Overdue</p><strong id="summary-overdue">0</strong><span>Past due</span>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-label">Done</p><strong id="summary-completion">0%</strong><span>Finished tasks</span>
+                </article>
             </section>
 
             <section class="filter-bar">
@@ -71,12 +87,32 @@
                 </label>
 
                 <div class="filter-grid">
-                    <label><span class="label-text">Status</span><select id="filter-status" multiple><option value="">All</option><option value="backlog">Backlog</option><option value="in-progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></label>
-                    <label><span class="label-text">Priority</span><select id="filter-priority" multiple><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
-                    <label><span class="label-text">Assignee</span><select id="filter-assignee" multiple></select></label>
-                    <label><span class="label-text">Label</span><select id="filter-label" multiple></select></label>
-                    <label><span class="label-text">Due</span><select id="filter-due-state"><option value="all">All</option><option value="overdue">Overdue</option><option value="due-today">Due today</option><option value="upcoming">Upcoming</option><option value="completed">Completed</option></select></label>
-                    <label><span class="label-text">Sort</span><select id="sort-by"><option value="due-date">Due date</option><option value="priority">Priority</option><option value="created-at">Creation date</option><option value="title">Title</option></select></label>
+                    <label><span class="label-text">Status</span><select id="filter-status" multiple>
+                            <option value="backlog">Backlog</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="review">Review</option>
+                            <option value="done">Done</option>
+                        </select></label>
+                    <label><span class="label-text">Priority</span><select id="filter-priority" multiple>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select></label>
+                    <label><span class="label-text">Assignee</span><select id="filter-assignee"
+                            multiple></select></label>
+                    <label><span class="label-text">Due</span><select id="filter-due-state">
+                            <option value="all">All</option>
+                            <option value="overdue">Overdue</option>
+                            <option value="due-today">Due today</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="completed">Completed</option>
+                        </select></label>
+                    <label><span class="label-text">Sort</span><select id="sort-by">
+                            <option value="due-date">Due date</option>
+                            <option value="priority">Priority</option>
+                            <option value="created-at">Creation date</option>
+                            <option value="title">Title</option>
+                        </select></label>
                 </div>
 
                 <div class="filter-actions">
@@ -98,9 +134,12 @@
                         <button type="button" class="btn btn-ghost" id="refresh-analytics">Refresh</button>
                     </div>
                     <div class="stats-cards" id="analytics-cards">
-                        <article class="stats-card"><span>Status count</span><strong id="analytics-status-count">0</strong></article>
-                        <article class="stats-card"><span>Completion</span><strong id="analytics-completion">0%</strong></article>
-                        <article class="stats-card"><span>Average finish</span><strong id="analytics-average-time">0d</strong></article>
+                        <article class="stats-card"><span>Status count</span><strong
+                                id="analytics-status-count">0</strong></article>
+                        <article class="stats-card"><span>Completion</span><strong id="analytics-completion">0%</strong>
+                        </article>
+                        <article class="stats-card"><span>Average finish</span><strong
+                                id="analytics-average-time">0d</strong></article>
                     </div>
                 </section>
 
@@ -115,19 +154,39 @@
 
                     <div class="board-columns" id="kanban-board">
                         <section class="column" data-status="backlog">
-                            <div class="column-head"><div><h4>Backlog</h4><p>Planned</p></div><span class="count-pill" id="count-backlog">0</span></div>
+                            <div class="column-head">
+                                <div>
+                                    <h4>Backlog</h4>
+                                    <p>Planned</p>
+                                </div><span class="count-pill" id="count-backlog">0</span>
+                            </div>
                             <div class="card-list" id="list-backlog"></div>
                         </section>
                         <section class="column" data-status="in-progress">
-                            <div class="column-head"><div><h4>In Progress</h4><p>Working</p></div><span class="count-pill" id="count-in-progress">0</span></div>
+                            <div class="column-head">
+                                <div>
+                                    <h4>In Progress</h4>
+                                    <p>Working</p>
+                                </div><span class="count-pill" id="count-in-progress">0</span>
+                            </div>
                             <div class="card-list" id="list-in-progress"></div>
                         </section>
                         <section class="column" data-status="review">
-                            <div class="column-head"><div><h4>Review</h4><p>Needs feedback</p></div><span class="count-pill" id="count-review">0</span></div>
+                            <div class="column-head">
+                                <div>
+                                    <h4>Review</h4>
+                                    <p>Needs feedback</p>
+                                </div><span class="count-pill" id="count-review">0</span>
+                            </div>
                             <div class="card-list" id="list-review"></div>
                         </section>
                         <section class="column" data-status="done">
-                            <div class="column-head"><div><h4>Done</h4><p>Finished</p></div><span class="count-pill" id="count-done">0</span></div>
+                            <div class="column-head">
+                                <div>
+                                    <h4>Done</h4>
+                                    <p>Finished</p>
+                                </div><span class="count-pill" id="count-done">0</span>
+                            </div>
                             <div class="card-list" id="list-done"></div>
                         </section>
                     </div>
@@ -196,15 +255,16 @@
                 <label class="field">
                     <span>Title</span>
                     <input id="task-title" name="title" type="text" minlength="3" maxlength="100" required>
-                    <small class="error-text" id="error-title" style="color: red; display: block; margin-top: 4px;"></small>
+                    <small class="error-text" id="error-title"
+                        style="color: red; display: block; margin-top: 4px;"></small>
                 </label>
-                
+
                 <label class="field field--full">
                     <span>Description</span>
                     <textarea id="task-description" name="description" rows="5"></textarea>
                     <small class="error-text" id="description-error"></small>
                 </label>
-                
+
                 <label class="field">
                     <span>Priority</span>
                     <select id="task-priority" name="priority">
@@ -213,19 +273,20 @@
                         <option value="high">High</option>
                     </select>
                 </label>
-                
+
                 <label class="field">
                     <span>Assignee</span>
                     <select id="task-assignee" name="assignee"></select>
                     <small class="error-text" id="assignee-error"></small>
                 </label>
-                
+
                 <label class="field">
                     <span>Due date</span>
                     <input id="task-due-date" name="dueDate" type="date">
-                    <small class="error-text" id="error-date" style="color: red; display: block; margin-top: 4px;"></small>
+                    <small class="error-text" id="error-date"
+                        style="color: red; display: block; margin-top: 4px;"></small>
                 </label>
-                
+
                 <label class="field">
                     <span>Status</span>
                     <select id="task-status" name="status">
@@ -235,14 +296,14 @@
                         <option value="done">Done</option>
                     </select>
                 </label>
-                
+
                 <label class="field field--full">
                     <span>Labels</span>
                     <input id="task-labels" name="labels" type="text" placeholder="frontend, api">
                     <small id="labels-help" class="help-text">Comma-separated labels.</small>
                     <small class="error-text" id="labels-error"></small>
                 </label>
-                
+
                 <label class="field">
                     <span>Created</span>
                     <input id="task-created-at" name="createdAt" type="date" readonly>
@@ -255,7 +316,7 @@
             </footer>
         </form>
     </dialog>
-    
+
 
     <dialog id="confirm-dialog" class="dialog-box dialog-box--confirm">
         <form method="dialog" class="dialog-form">
@@ -287,7 +348,8 @@
                     <button type="button" class="icon-button card-menu-toggle">⋯</button>
                     <div class="card-menu-panel is-hidden">
                         <button type="button" class="card-menu-item" data-action="edit">Edit</button>
-                        <button type="button" class="card-menu-item card-menu-item--danger" data-action="delete">Delete</button>
+                        <button type="button" class="card-menu-item card-menu-item--danger"
+                            data-action="delete">Delete</button>
                     </div>
                 </div>
             </header>
@@ -297,7 +359,7 @@
         </article>
     </template>
 
-    
+
 
     <script type="module" src="./js/app1.js"></script>
 </body>

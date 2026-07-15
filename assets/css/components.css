@@ -1,0 +1,62 @@
+/* --- TOAST NOTIFICATION SYSTEM --- */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 9999; /* Always on top */
+    pointer-events: none; /* Lets you click behind the container */
+}
+
+.toast {
+    min-width: 280px;
+    max-width: 350px;
+    background: var(--bg-surface, #ffffff);
+    color: var(--text-main, #333333);
+    padding: 12px 16px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto; /* Restores clicking on the toast itself */
+    
+    /* Animation defaults */
+    opacity: 0;
+    transform: translateX(100%);
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-left: 4px solid #3b82f6; /* Default Blue */
+}
+
+.toast--visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Toast Themes */
+.toast--success { border-left-color: #10b981; }
+.toast--error { border-left-color: #ef4444; }
+.toast--warning { border-left-color: #f59e0b; }
+.toast--info { border-left-color: #3b82f6; }
+
+.toast-content {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.25rem;
+    cursor: pointer;
+    margin-left: 12px;
+    padding: 0 4px;
+}
+
+.toast-close:hover {
+    color: #333;
+}
