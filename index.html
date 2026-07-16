@@ -28,7 +28,7 @@
                 <a class="panel-link panel-link--active" href="#dashboard">Dashboard</a>
                 <a class="panel-link" href="#board-view">Board</a>
                 <a class="panel-link" href="#tasks-panel">List</a>
-                <a class="panel-link" href="#analytics">Stats</a>
+                
             </nav>
             <section class="panel-card">
                 <h2>Sync</h2>
@@ -50,6 +50,24 @@
                     <span>Mode: kanban</span>
                 </div>
             </section>
+
+            <section class="stats-panel">
+                    <div class="section-head">
+                        <div>
+                            <p class="eyebrow">Stats</p>
+                            <h3>Board health</h3>
+                        </div>
+                        <button type="button" class="btn btn-ghost" id="refresh-analytics">Refresh</button>
+                    </div>
+                    <div class="stats-cards" id="analytics-cards">
+                        <article class="stats-card"><span>Status count</span><strong
+                                id="analytics-status-count">0</strong></article>
+                        <article class="stats-card"><span>Completion</span><strong id="analytics-completion">0%</strong>
+                        </article>
+                        <article class="stats-card"><span>Average finish</span><strong
+                                id="analytics-average-time">0d</strong></article>
+                    </div>
+                </section>
         </aside>
 
         <main class="content" id="main-content">
@@ -125,31 +143,14 @@
             </section>
 
             <section class="workspace-grid" id="analytics">
-                <section class="stats-panel">
-                    <div class="section-head">
-                        <div>
-                            <p class="eyebrow">Stats</p>
-                            <h3>Board health</h3>
-                        </div>
-                        <button type="button" class="btn btn-ghost" id="refresh-analytics">Refresh</button>
-                    </div>
-                    <div class="stats-cards" id="analytics-cards">
-                        <article class="stats-card"><span>Status count</span><strong
-                                id="analytics-status-count">0</strong></article>
-                        <article class="stats-card"><span>Completion</span><strong id="analytics-completion">0%</strong>
-                        </article>
-                        <article class="stats-card"><span>Average finish</span><strong
-                                id="analytics-average-time">0d</strong></article>
-                    </div>
-                </section>
+                
 
                 <section class="board-panel" id="board-view">
                     <div class="section-head">
                         <div>
-                            <p class="eyebrow">Board</p>
-                            <h3>Workflow</h3>
+                            <p class="eyebrow">Task Board</p>
+                            
                         </div>
-                        <p class="help-text">Drag cards or change status in the form.</p>
                     </div>
 
                     <div class="board-columns" id="kanban-board">
@@ -192,13 +193,7 @@
                     </div>
 
                     <section class="table-view is-hidden" id="tasks-panel">
-                        <div class="section-head">
-                            <div>
-                                <p class="eyebrow">List</p>
-                                <h3>Visible tasks</h3>
-                            </div>
-                            <p class="help-text">Useful on smaller screens.</p>
-                        </div>
+                        
                         <div class="table-wrap">
                             <table class="task-table">
                                 <thead>

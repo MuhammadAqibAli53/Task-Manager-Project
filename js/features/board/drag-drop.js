@@ -1,17 +1,22 @@
-/**
- * js/features/board/drag-drop.js
- */
+
 import { store } from '../../core/store.js';
 import { syncService } from '../../services/sync-service.js';
 
+
+
 export function initDragAndDrop() {
+
+
+
     const board = document.getElementById('kanban-board');
-    let draggedTaskId = null;
+
+    
+    let deagID = null;
 
     board.addEventListener('dragstart', (event) => {
         const card = event.target.closest('.task-card');
         if (card) {
-            draggedTaskId = card.dataset.id;
+            deagID = card.dataset.id;
             card.style.opacity = '0.5'; 
         }
     });
@@ -21,7 +26,7 @@ export function initDragAndDrop() {
         if (card) {
             card.style.opacity = '1'; 
         }
-        draggedTaskId = null; 
+        deagID = null; 
     });
 
     board.addEventListener('dragover',(event) => {
@@ -32,55 +37,55 @@ export function initDragAndDrop() {
         event.preventDefault();
         
         const targetColumn = event.target.closest('.column');
-        const card = document.querySelector(`[data-id="${draggedTaskId}"]`); 
+
+        const card = document.querySelector(`[data-id="${deagID}"]`); 
         
-        if (targetColumn && draggedTaskId && card) {
+        if (targetColumn && deagID && card) {
+          
             const newStatus = targetColumn.dataset.status;
             const currentTasks = store.getState().tasks;
             
-            // Find the actual task object from the database
-            const draggedTask = currentTasks.find(t => t.id === draggedTaskId);
+         
+            const draggedTask = currentTasks.find(t => t.id === deagID);
 
-            // RULE 3: Cannot move to Done without an assignee
             if (newStatus === 'done' && (draggedTask.assignee === 'Unassigned' || draggedTask.assignee.trim() === '')) {
                 showInlineCardError(card, 'Cannot complete: Assign someone first.');
                 return;
             }
-        
-            // RULE 4: Cannot review without a description
+
             if (newStatus === 'review' && draggedTask.description.trim() === '') {
                 showInlineCardError(card, 'Cannot review: Add a description first.');
                 return; 
             }
-            
-            // Create the updated task object
+
             const updatedTaskData = { ...draggedTask, status: newStatus };
 
             const updatedTasks = currentTasks.map(task => {
-                if (task.id === draggedTaskId) {
+                if (task.id === deagID) {
                     return updatedTaskData;
                 }
                 return task;
             });
             
-            // 1. Optimistic Update: Instantly render to the local UI
+
             store.setState({ tasks: updatedTasks });
 
-            // 2. Sync Queue: If offline, safely log the action in IndexedDB
             if (!navigator.onLine) {
                 await syncService.queueOperation('MOVE_TASK', updatedTaskData);
             }
         }
     });
 
-    // --- HELPER FUNCTION: INLINE CARD ERRORS ---
+
     function showInlineCardError(cardElement, message) {
-        // Prevent spamming multiple errors
+        
+        
+        
         if (cardElement.querySelector('.card-error-msg')) return;
 
         const errorEl = document.createElement('div');
         errorEl.className = 'card-error-msg';
-        errorEl.style.color = '#dc2626'; // Red text
+        errorEl.style.color = '#dc2626'; 
         errorEl.style.fontSize = '0.75rem';
         errorEl.style.marginTop = '8px';
         errorEl.style.fontWeight = 'bold';
@@ -88,7 +93,6 @@ export function initDragAndDrop() {
 
         cardElement.appendChild(errorEl);
 
-        // Remove the error automatically after 3 seconds
         setTimeout(() => {
             errorEl.remove();
         }, 3000);

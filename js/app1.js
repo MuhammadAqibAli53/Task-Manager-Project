@@ -1,6 +1,3 @@
-/**
- * js/app1.js
- */
 import { store } from './core/store.js';
 import { fetchInitialTasks } from './services/api-client.js';
 import { initTaskForm } from './features/tasks/task-form.js';
@@ -13,28 +10,32 @@ import { initTaskActions } from './features/tasks/task-action.js';
 import { initUndoRedo } from './features/history/undo-redo.js';
 import { syncService } from './services/sync-service.js';
 import { initToastSystem } from './features/ui/toast.js';
-import { initRouter } from './core/router.js'; 
+import { initRouter } from './core/router.js';
 import './utils/generator.js'
 import '../tests/app.test.js'
 
 
 
 
-// 1. Grab the template from your HTML
 const template = document.getElementById('task-card-template');
 
 function renderTable(tasks) {
     const tableBody = document.getElementById('task-table-body');
-    tableBody.innerHTML = ''; 
+    tableBody.innerHTML = '';
 
     tasks.forEach(task => {
-        const row = document.createElement('tr');
-        row.dataset.id = task.id; 
-        
+            const row = document.createElement('tr');
+        row.dataset.id = task.id;
+
         row.innerHTML = `
-            <td><strong>${task.title}</strong></td>
-            <td>${task.assignee}</td>
-            <td><span class="status-pill">${task.priority}</span></td>
+            <td><strong>${task.title}</strong>
+            </td>
+
+            <td>${task.assignee}
+            </td>
+            <td><span class="status-pill">
+            ${task.priority}</span>
+            </td>
             <td>${task.dueDate}</td>
             <td>${task.status.replace('-', ' ')}</td>
             <td>
@@ -87,10 +88,10 @@ async function initApp() {
 
     // --- WEB WORKER INITIALIZATION ---
     const analyticsWorker = new Worker('./js/workers/analytics.worker.js');
-    
+
     analyticsWorker.onmessage = (event) => {
         const stats = event.data;
-        
+
         const overdueEl = document.getElementById('summary-overdue');
         const completionEl = document.getElementById('summary-completion');
         if (overdueEl) overdueEl.textContent = stats.overdueCount;
@@ -99,7 +100,7 @@ async function initApp() {
         const healthStatusCount = document.getElementById('analytics-status-count');
         const healthCompletion = document.getElementById('analytics-completion');
         const healthAvgTime = document.getElementById('analytics-average-time');
-        
+
         if (healthStatusCount) healthStatusCount.textContent = stats.totalTasks;
         if (healthCompletion) healthCompletion.textContent = `${stats.completionPercent}%`;
         if (healthAvgTime) healthAvgTime.textContent = stats.averageTime;
@@ -108,18 +109,18 @@ async function initApp() {
     const refreshBtn = document.getElementById('refresh-analytics');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', () => {
-            store.setState({}); 
+            store.setState({});
         });
     }
 
     store.subscribe((data) => {
         saveTasksToDB(data.tasks);
-        
+
         analyticsWorker.postMessage(data.tasks);
 
         const filters = data.filters;
 
-        // 1. FILTERING
+        //  FILTERING
         const filteredTasks = data.tasks.filter(task => {
             let matchesSearch = true;
             if (filters.search !== '') {
@@ -134,7 +135,7 @@ async function initApp() {
             if (filters.status.length > 0 && !filters.status.includes(task.status)) return false;
             if (filters.priority.length > 0 && !filters.priority.includes(task.priority)) return false;
             if (filters.assignee.length > 0 && !filters.assignee.includes(task.assignee)) return false;
-            
+
             return matchesSearch;
         });
 
@@ -152,7 +153,7 @@ async function initApp() {
 
         // 3. LIGHTWEIGHT UI UPDATES
         const today = new Date().toISOString().split('T')[0];
-        
+
         document.getElementById('summary-open').textContent = data.tasks.filter(t => t.status !== 'done').length;
         document.getElementById('summary-due-today').textContent = data.tasks.filter(t => t.dueDate === today && t.status !== 'done').length;
 
@@ -166,7 +167,7 @@ async function initApp() {
         if (filters.status.length) activeFilters.push(filters.status.join(', '));
         if (filters.priority.length) activeFilters.push(filters.priority.join(', '));
         if (filters.assignee.length) activeFilters.push(filters.assignee.join(', '));
-        
+
         const filterText = activeFilters.length > 0 ? activeFilters.join(' + ') : 'none';
         const sortText = data.sort.replace('-', ' ');
 

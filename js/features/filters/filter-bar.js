@@ -1,23 +1,23 @@
-/**
- * js/features/filters/filter-bar.js
- */
 import { store } from '../../core/store.js';
 
 
 export async function initFilterBar() {
-    const searchInput = document.getElementById('task-search');
-    const clearfilter = document.getElementById('clear-filters');
+    const searchIN = document.getElementById('task-search');
+    const clearfil = document.getElementById('clear-filters');
     let Timer;
 
-    // 2. FETCH THE JSON FILE (Adjust this path if your data folder is somewhere else!)
     try {
         const response = await fetch('./data/users.json'); 
+
         const users = await response.json();
 
-        // 3. DYNAMICALLY POPULATE THE ASSIGNEE DROPDOWN
+
         const assigneeSelect = document.getElementById('filter-assignee');
+
         if (assigneeSelect) {
+
             assigneeSelect.innerHTML = ''; 
+
             
             users.forEach(user => {
                 const option = document.createElement('option');
@@ -30,15 +30,17 @@ export async function initFilterBar() {
         console.error("Could not load users.json:", error);
     }
 
+    if (clearfil) {
+        clearfil.addEventListener('click', (e) => {
 
-    // 2. THE CLEAR BUTTON LOGIC
-    if (clearfilter) {
-        clearfilter.addEventListener('click', (e) => {
-            if (searchInput) searchInput.value = '';
+            if (searchIN) searchIN.value = '';
 
             const filterTypes = ['status', 'priority', 'assignee', 'label'];
+           
+           
             filterTypes.forEach(filterName => {
                 const selectElement = document.getElementById(`filter-${filterName}`);
+              
                 if (selectElement) {
                     Array.from(selectElement.options).forEach(option => {
                         option.selected = false;
@@ -64,8 +66,8 @@ export async function initFilterBar() {
     }
 
     // 3. THE SEARCH BAR LOGIC
-    if (searchInput) {
-        searchInput.addEventListener('input', (event) => {
+    if (searchIN) {
+        searchIN.addEventListener('input', (event) => {
             clearTimeout(Timer);
             Timer = setTimeout(() => {
                 const searchTerm = event.target.value.toLowerCase();
