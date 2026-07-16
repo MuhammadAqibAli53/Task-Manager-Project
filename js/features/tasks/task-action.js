@@ -68,25 +68,33 @@ export function initTaskActions() {
     const confirmCloseBtns = confirmDialog.querySelectorAll('[data-close-dialog]');
     confirmCloseBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            pendingDeleteId = null; // Clear the memory
+            DeleteId = null; // Clear the memory
             confirmDialog.close();  // Close the popup
         });
     });
 
     const confirmBtn = document.getElementById('confirm-action');
     if (confirmBtn) {
-        confirmBtn.addEventListener('click', (e) => {
+        confirmBtn.addEventListener('click',async (e) => {
             e.preventDefault();
+
             if (DeleteId) {
                 const currentTasks = store.getState().tasks;
+                const taskToDelete = currentTasks.find(t => t.id === DeleteId);
       
                 const updatedTasks = currentTasks.filter(task => task.id !== DeleteId);
                 
                 store.setState({ tasks: updatedTasks });
+                confirmDialog.close();
+
+                // --- NEW: Queue deletion if offline ---
+                if (!navigator.onLine && taskToDelete) {
+                    await syncService.queueOperation('DELETE_TASK', taskToDelete);
+                }
                 
                 DeleteId = null;
-                confirmDialog.close();
             }
+            
         });
     }
 

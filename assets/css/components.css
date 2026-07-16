@@ -13,8 +13,8 @@
 .toast {
     min-width: 280px;
     max-width: 350px;
-    background: var(--bg-surface, #ffffff);
-    color: var(--text-main, #333333);
+    background: var(--surface);
+    color: var(--text);
     padding: 12px 16px;
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -27,7 +27,7 @@
     opacity: 0;
     transform: translateX(100%);
     transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border-left: 4px solid #3b82f6; 
+    border-left: 4px solid #0f766e; 
 }
 
 .toast--visible {
@@ -35,8 +35,8 @@
     transform: translateX(0);
 }
 
-.toast--success { border-left-color: #10b981; }
-.toast--error { border-left-color: #ef4444; }
+.toast--success { border-left-color: #047857; }
+.toast--error { border-left-color: #b42318; }
 .toast--warning { border-left-color: #f59e0b; }
 .toast--info { border-left-color: #3b82f6; }
 
@@ -46,23 +46,22 @@
     line-height: 1.4;
 }
 
-
 .toast-close {
     background: transparent !important;
     border: none !important;
-    color: #888;
+    color: var(--text-muted);
     font-size: 1.5rem;
     cursor: pointer;
-    margin-left: auto; /* Pushes it to the far right */
+    margin-left: auto;
     padding: 0 8px;
     line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: auto; /* Ensures it can always be clicked */
+    pointer-events: auto;
 }
 
 .toast-close:hover {
-    color: #111;
+    color: var(--text);
     background: transparent !important;
 }

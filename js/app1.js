@@ -13,7 +13,11 @@ import { initTaskActions } from './features/tasks/task-action.js';
 import { initUndoRedo } from './features/history/undo-redo.js';
 import { syncService } from './services/sync-service.js';
 import { initToastSystem } from './features/ui/toast.js';
-import { initRouter } from './core/router.js'; // <-- 1. IMPORT THE ROUTER
+import { initRouter } from './core/router.js'; 
+import './utils/generator.js'
+import '../tests/app.test.js'
+
+
 
 
 // 1. Grab the template from your HTML

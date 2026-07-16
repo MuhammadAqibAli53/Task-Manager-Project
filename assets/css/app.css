@@ -11,6 +11,7 @@ body {
     font-family: Arial, Helvetica, sans-serif;
     background: var(--bg);
     color: var(--text);
+    overflow-x: hidden; /* Fixes horizontal scrollbar when zoomed in */
 }
 
 a {
@@ -29,6 +30,7 @@ button {
     cursor: pointer;
 }
 
+/* --- MASTER LAYOUT --- */
 .layout {
     display: flex;
     min-height: 100vh;
@@ -73,6 +75,7 @@ button {
     color: var(--text-muted);
 }
 
+/* --- SIDEBAR NAV & CARDS --- */
 .panel-nav {
     display: grid;
     gap: 0.5rem;
@@ -131,8 +134,10 @@ button {
     font-size: 0.92rem;
 }
 
+/* --- MAIN CONTENT & BUTTONS --- */
 .content {
     padding: 2rem;
+    width: 100%;
 }
 
 .page-header {
@@ -211,6 +216,7 @@ button {
     border-color: var(--primary);
 }
 
+/* --- STATS & FILTERS --- */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -269,10 +275,24 @@ button:focus-visible {
     box-shadow: var(--focus-ring);
 }
 
+/* --- WORKSPACE GRID (Responsive Flex Layout) --- */
 .workspace-grid {
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 1rem;
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 1.5rem;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.stats-panel {
+    flex: 1 1 200px; 
+    max-width: 320px; 
+}
+
+.board-panel {
+    flex: 999 1 500px; 
+    min-width: 0; 
+    width: 100%;
 }
 
 .section-head {
@@ -288,15 +308,25 @@ button:focus-visible {
     gap: 1rem;
 }
 
+/* --- KANBAN BOARD --- */
 .board-columns {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(20px, 1fr));
     gap: 1rem;
+    align-items: start;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 1rem;
 }
 
 .column {
-    min-height: 16rem;
-    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    max-height: 75vh;
+    min-height: 250px; /* Prevents empty columns from collapsing */
 }
 
 .column-head {
@@ -304,7 +334,18 @@ button:focus-visible {
     justify-content: space-between;
     gap: 1rem;
     align-items: start;
-    margin-bottom: 1rem;
+    padding: 1rem 1rem 0 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0 1rem 1rem 1rem;
+    flex-grow: 1;
+    overflow-y: auto; 
+    min-height: 100px; 
 }
 
 .count-pill {
@@ -316,12 +357,7 @@ button:focus-visible {
     font-weight: 700;
 }
 
-.card-list {
-    display: grid;
-    gap: 0.75rem;
-    min-height: 8rem;
-}
-
+/* --- TASK CARDS --- */
 .task-card {
     padding: 1rem;
     border: 1px solid var(--border);
@@ -391,8 +427,14 @@ button:focus-visible {
     flex-wrap: wrap;
 }
 
+/* --- TABLE VIEW --- */
 .table-wrap {
-    overflow-x: auto;
+    min-height: 250px; /* Prevents empty list view from collapsing */
+    max-height: 75vh;
+    overflow-y: auto; 
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
 }
 
 .task-table {
@@ -400,13 +442,23 @@ button:focus-visible {
     border-collapse: collapse;
 }
 
-.task-table th,
+.task-table th {
+    position: sticky;
+    top: 0;
+    background: var(--surface-muted);
+    z-index: 10;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+
 .task-table td {
     padding: 0.9rem 1rem;
     border-bottom: 1px solid var(--border);
     text-align: left;
 }
 
+/* --- STATE VIEWS --- */
 .empty-view,
 .loading-view,
 .error-view {
@@ -438,6 +490,7 @@ button:focus-visible {
     margin-top: 1rem;
 }
 
+/* --- DIALOG & FORMS --- */
 .dialog-box {
     width: min(92vw, 720px);
     border: none;
@@ -480,16 +533,7 @@ button:focus-visible {
     font-size: 0.85rem;
 }
 
-.toast-area {
-    position: fixed;
-    right: 1rem;
-    bottom: 1rem;
-    display: grid;
-    gap: 0.75rem;
-    width: min(90vw, 360px);
-    z-index: 40;
-}
-
+/* --- UTILITIES --- */
 .is-hidden {
     display: none !important;
 }
@@ -506,9 +550,9 @@ button:focus-visible {
     border: 0;
 }
 
+/* --- RESPONSIVE QUERIES --- */
 @media (max-width: 1200px) {
-
-    .workspace-grid,
+    /* Notice .workspace-grid is removed here so flexbox can handle itself! */
     .board-columns,
     .stats-grid,
     .filter-grid {
@@ -523,14 +567,11 @@ button:focus-visible {
 
     .left-panel {
         width: 100%;
-    }
-
-    .left-panel {
         border-right: 0;
         border-bottom: 1px solid var(--border);
     }
 
-    .workspace-grid,
+    /* Notice .workspace-grid is removed here as well */
     .board-columns,
     .stats-grid,
     .filter-grid,
