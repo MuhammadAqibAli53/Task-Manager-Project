@@ -4,53 +4,33 @@
 import { store } from '../../core/store.js';
 
 export function initViewToggle() {
-    // 1. Grab the buttons from the Filter Bar
     const btnKanban = document.getElementById('view-kanban');
     const btnList = document.getElementById('view-list');
 
-    // 2. Grab the links from the Sidebar Navigation
-    const navBoard = document.querySelector('a[href="#board-view"]');
-    const navList = document.querySelector('a[href="#tasks-panel"]');
-    
-    // Grab all sidebar links so we can move the active highlight color
-    const allNavLinks = document.querySelectorAll('.panel-link');
-
-    // Helper function to handle sidebar clicks
-    function handleSidebarNav(mode, clickedElement) {
-        // Tell the central brain to flip the view
-        store.setState({ viewMode: mode });
-
-        // Move the "active" visual styling to the link you just clicked
-        if (clickedElement) {
-            allNavLinks.forEach(link => link.classList.remove('panel-link--active'));
-            clickedElement.classList.add('panel-link--active');
-        }
-    }
-
-    // --- ATTACH LISTENERS ---
-
-    // Filter Bar Buttons
+    // 1. Filter Bar Buttons: Update the Store AND the URL Hash
     if (btnKanban) {
-        btnKanban.addEventListener('click', () => store.setState({ viewMode: 'kanban' }));
+        btnKanban.addEventListener('click', () => {
+            store.setState({ viewMode: 'kanban' });
+            window.location.hash = '#dashboard'; // Force the router to un-hide the board
+        });
     }
     
     if (btnList) {
-        btnList.addEventListener('click', () => store.setState({ viewMode: 'list' }));
-    }
-
-    // Sidebar Links
-    if (navBoard) {
-        navBoard.addEventListener('click', (e) => {
-            // Stop HTML from just scrolling, let JS handle it!
-            e.preventDefault(); 
-            handleSidebarNav('kanban', navBoard);
+        btnList.addEventListener('click', () => {
+            store.setState({ viewMode: 'list' });
+            window.location.hash = '#tasks-panel'; // Force the router to go to list mode
         });
     }
 
-    if (navList) {
-        navList.addEventListener('click', (e) => {
-            e.preventDefault();
-            handleSidebarNav('list', navList);
-        });
-    }
+    // 2. Sidebar Links: Just listen to the URL changing naturally!
+    // Because we removed the old e.preventDefault(), clicking the 
+    // sidebar links will now effortlessly trigger this listener.
+    window.addEventListener('hashchange', () => {
+        const hash = window.location.hash;
+        if (hash === '#tasks-panel') {
+            store.setState({ viewMode: 'list' });
+        } else if (hash === '#board-view' || hash === '#dashboard' || hash === '') {
+            store.setState({ viewMode: 'kanban' });
+        }
+    });
 }

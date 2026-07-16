@@ -16,34 +16,27 @@ export function initRouter() {
             }
         });
 
-        // 2. Select the main view wrappers from your index.html
-        const analyticsSection = document.getElementById('analytics');
-        const boardSection = document.getElementById('board-view');
-        const tasksPanel = document.getElementById('tasks-panel');
-        const kanbanBoard = document.getElementById('kanban-board');
+        // 2. Select the main view wrappers using Classes 
+        const statsPanel = document.querySelector('.stats-panel');
+        const boardPanel = document.querySelector('.board-panel');
 
-        // Safety check if elements are still loading
-        if (!boardSection) return;
+        if (!boardPanel || !statsPanel) return;
 
-        // 3. Handle routing views cleanly
+        // 3. Handle routing panels cleanly without touching the Kanban/List internals
         if (hash === '#analytics') {
-            // Hide board views, focus on stats
-            boardSection.classList.add('is-hidden');
-            if (analyticsSection) analyticsSection.classList.remove('is-hidden');
+            // Focus entirely on Stats, hide the board wrapper
+            boardPanel.classList.add('is-hidden');
+            statsPanel.classList.remove('is-hidden');
         } 
-        else if (hash === '#tasks-panel') {
-            // Show board section, display List view, hide Kanban
-            boardSection.classList.remove('is-hidden');
-            if (analyticsSection) analyticsSection.classList.add('is-hidden');
-            if (kanbanBoard) kanbanBoard.classList.add('is-hidden');
-            if (tasksPanel) tasksPanel.classList.remove('is-hidden');
+        else if (hash === '#board-view' || hash === '#tasks-panel') {
+            // Focus entirely on the Board/List, hide the stats panel
+            statsPanel.classList.add('is-hidden');
+            boardPanel.classList.remove('is-hidden');
         } 
         else {
-            // Default (Dashboard / Board): Show board and Kanban view
-            boardSection.classList.remove('is-hidden');
-            if (analyticsSection) analyticsSection.classList.remove('is-hidden');
-            if (kanbanBoard) kanbanBoard.classList.remove('is-hidden');
-            if (tasksPanel) tasksPanel.classList.add('is-hidden');
+            // Default (#dashboard): Show BOTH side-by-side!
+            statsPanel.classList.remove('is-hidden');
+            boardPanel.classList.remove('is-hidden');
         }
     }
 
