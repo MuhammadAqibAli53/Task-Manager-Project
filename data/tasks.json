@@ -1083,9 +1083,9 @@
         "description": "Document variables and outputs for the custom AWS modules.",
         "priority": "medium",
         "assignee": "Ali",
-        "dueDate": "2026-10-27",
+        "dueDate": "2026-07-17",
         "labels": "docs, devops",
-        "createdAt": "2026-08-17",
+        "createdAt": "2026-07-17",
         "status": "backlog"
     },
     {

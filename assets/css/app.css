@@ -362,7 +362,7 @@ button {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    max-height: 640px;
+    max-height: 400px;
 }
 
 .column-head {
@@ -635,6 +635,7 @@ body[data-theme="dark"] {
 [data-theme="dark"] .left-panel,
 [data-theme="dark"] .panel-card,
 [data-theme="dark"] .stat-card,
+[data-theme="dark"] .stat-card strong,
 [data-theme="dark"] .stats-panel,
 [data-theme="dark"] .stats-card,
 [data-theme="dark"] .filter-bar,
