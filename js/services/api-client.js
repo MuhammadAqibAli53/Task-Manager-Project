@@ -1,24 +1,41 @@
+export class APIError extends Error {
+    constructor(message, status = 500, data = null) {
+        super(message);
+        this.name = 'APIError';
+        this.status = status;
+        this.data = data;
+    }
+}
 
 class ApiClient {
     constructor(baseURL = '') {
         this.baseURL = baseURL;
     }
 
-    async request(endpoint, { method = 'GET', body = null, headers = {} } = {}) {
+
+    async request(endpoint, options = {}) {
+  
+        const method = options.method;
+        const body = options.body;
+        const headers = options.headers;
+
+    
         try {
-            const options = {
-                method,
+   
+            const opt = {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json',
                     ...headers
                 }
             };
 
+   
             if (body) {
-                options.body = JSON.stringify(body);
+                opt.body = JSON.stringify(body);
             }
 
-            const response = await fetch(`${this.baseURL}${endpoint}`, options);
+            const response = await fetch(`${this.baseURL}${endpoint}`, opt);
 
             if (!response.ok) {
                 throw new APIError(`HTTP Error: ${response.statusText}`, response.status);
@@ -27,35 +44,31 @@ class ApiClient {
             return await response.json();
 
         } catch (error) {
-    
             throw error;
-    
         }
     }
 
+    
     get(endpoint, options = {}) {
-        return this.request(endpoint, { ...options, method: 'GET' });
+        options.method = 'GET';
+        return this.request(endpoint, options);
     }
 
     post(endpoint, body, options = {}) {
-        return this.request(endpoint, { ...options, method: 'POST', body });
+        options.method = 'POST';
+        options.body = body;
+        return this.request(endpoint, options);
     }
 
     put(endpoint, body, options = {}) {
-        return this.request(endpoint, { ...options, method: 'PUT', body });
+        options.method = 'PUT';
+        options.body = body;
+        return this.request(endpoint, options);
     }
 
     delete(endpoint, options = {}) {
-        return this.request(endpoint, { ...options, method: 'DELETE' });
-    }
-}
-
-export class APIError extends Error {
-    constructor(message, status = 500, data = null) {
-        super(message);
-        this.name = 'APIError';
-        this.status = status;
-        this.data = data;
+        options.method = 'DELETE';
+        return this.request(endpoint, options);
     }
 }
 

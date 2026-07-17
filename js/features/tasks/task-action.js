@@ -68,8 +68,8 @@ export function initTaskActions() {
     const confirmCloseBtns = confirmDialog.querySelectorAll('[data-close-dialog]');
     confirmCloseBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            DeleteId = null; // Clear the memory
-            confirmDialog.close();  // Close the popup
+            DeleteId = null; 
+            confirmDialog.close();  
         });
     });
 
@@ -86,8 +86,6 @@ export function initTaskActions() {
                 
                 store.setState({ tasks: updatedTasks });
                 confirmDialog.close();
-
-                // --- NEW: Queue deletion if offline ---
                 if (!navigator.onLine && taskToDelete) {
                     await syncService.queueOperation('DELETE_TASK', taskToDelete);
                 }

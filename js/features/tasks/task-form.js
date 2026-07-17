@@ -1,6 +1,4 @@
-/**
- * js/features/tasks/task-form.js
- */
+
 import { store } from '../../core/store.js';
 import { syncService } from '../../services/sync-service.js';
 
@@ -10,14 +8,14 @@ export async function initTaskForm() {
     const closeBtns = document.querySelectorAll('[data-close-dialog]');
     const form = document.getElementById('task-form');
 
-    // --- FETCH AND POPULATE THE FORM DROPDOWN ---
+
     const assigneeSelect = document.getElementById('task-assignee');
     if (assigneeSelect) {
         try {
             const response = await fetch('./data/users.json');
             const users = await response.json();
             
-            // Start with a default empty/unassigned option
+
             assigneeSelect.innerHTML = '<option value="">Unassigned</option>'; 
             
             users.forEach(user => {
@@ -31,7 +29,7 @@ export async function initTaskForm() {
         }
     }
 
-    // --- DIALOG CONTROLS ---
+
     if (newTaskBtn) {
         newTaskBtn.addEventListener('click', () => {
             form.reset();
@@ -49,7 +47,7 @@ export async function initTaskForm() {
         });
     });
 
-    // --- FORM SUBMISSION & OFFLINE INTEGRATION ---
+
     form.addEventListener('submit', async (event) => {
         event.preventDefault(); 
 
@@ -60,12 +58,11 @@ export async function initTaskForm() {
         
         const existingId = formData.get('task-id');
 
-        // Reset errors
+
         document.getElementById('error-title').textContent = '';
         document.getElementById('error-date').textContent = '';
         let isValid = true;
 
-        // Validation Rules
         if (title.length < 3 || title.length > 100) {
             document.getElementById('error-title').textContent = 'Title must be between 3 and 100 characters.';
             isValid = false;
@@ -78,10 +75,9 @@ export async function initTaskForm() {
 
         if (!isValid) return; 
 
-        // State Preparation
         const currentTasks = store.getState().tasks;
         let updatedTasks;
-        let newlyCreatedTask = null; // Our hoisted bucket for new tasks
+        let newlyCreatedTask = null; 
 
         if (existingId) {
             updatedTasks = currentTasks.map(task => {
@@ -100,7 +96,7 @@ export async function initTaskForm() {
                 return task;
             });
         } else {
-            // Build the new task object
+
             newlyCreatedTask = {
                 id: 'task-' + crypto.randomUUID().split('-')[0],
                 title: title,
@@ -115,18 +111,17 @@ export async function initTaskForm() {
             updatedTasks = [...currentTasks, newlyCreatedTask];
         }
 
-        // 1. Optimistic Update: Instantly render to the local UI
+
         store.setState({ tasks: updatedTasks });
         dialog.close();
 
-        // 2. Sync Queue: If offline, safely log the action in IndexedDB
         if (!navigator.onLine) {
             if (existingId) {
-                // Find the task we just updated to send to the queue
+
                 const editedTask = updatedTasks.find(t => t.id === existingId);
                 await syncService.queueOperation('UPDATE_TASK', editedTask);
             } else {
-                // Pass the brand new task down here safely
+
                 await syncService.queueOperation('CREATE_TASK', newlyCreatedTask);
             }
         }

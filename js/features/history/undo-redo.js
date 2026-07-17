@@ -2,85 +2,79 @@
 import { store } from '../../core/store.js';
 
 export function initUndoRedo() {
-    const MAX_HISTORY = 20; // Section 9 requirement
+    const max = 20;
     
-    let undoStack = [];
-    let redoStack = [];
+    let undo = [];
+    let redo = [];
     
 
-    let isNavigatingHistory = false;
+    let history = false;
 
 
     store.subscribe((data) => {
 
-        if (isNavigatingHistory) {
-            isNavigatingHistory = false; 
+        if (history) {
+            history = false; 
             return;
         }
 
-        const snapshot = JSON.stringify(data.tasks);
+        const snap = JSON.stringify(data.tasks);
 
-        if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== snapshot) {
-            undoStack.push(snapshot);
+        if (undo.length === 0 || undo[undo.length - 1] !== snap) {
+            undo.push(snap);
 
            
-            if (undoStack.length > MAX_HISTORY + 1) {
-                undoStack.shift(); 
+            if (undo.length > max + 1) {
+                undo.shift(); 
             }
-
-            redoStack = [];
+            redo = [];
         }
     });
 
 
     document.addEventListener('keydown', (event) => {
      
-        const isCtrl = event.ctrlKey || event.metaKey;
+        const isCtrl = event.ctrlKey;
 
-        // UNDO: Ctrl + Z (Make sure Shift is NOT pressed)
         if (isCtrl && event.key.toLowerCase() === 'z' && !event.shiftKey) {
-            event.preventDefault(); // Stop the browser from just deleting text
-            performUndo();
+            event.preventDefault(); 
+            undofun();
         }
 
-        // REDO: Ctrl + Shift + Z  -OR-  Ctrl + Y
+        
         if (isCtrl && ((event.key.toLowerCase() === 'z' && event.shiftKey) || event.key.toLowerCase() === 'y')) {
             event.preventDefault();
-            performRedo();
+            redofun();
         }
     });
 
-    // 3. THE UNDO LOGIC
-    function performUndo() {
-        // We need at least 2 photos to go backward (the current one, and the previous one)
-        if (undoStack.length > 1) {
-            // Take the current state off the Undo stack and save it for the future
-            const currentState = undoStack.pop();
-            redoStack.push(currentState);
+   
+    function undofun() {
+   
+        if (undo.length > 1) {
+   
+            const currentState = undo.pop();
+            redo.push(currentState);
 
-            // Look at the previous state
-            const previousStateStr = undoStack[undoStack.length - 1];
-            const previousTasks = JSON.parse(previousStateStr);
+   
+            const previousStateStr =undo[undo.length - 1];
+          const previousTasks = JSON.parse(previousStateStr);
 
-            // Update the store! (Turn on the security lock first)
-            isNavigatingHistory = true;
+
+          history = true;
             store.setState({ tasks: previousTasks });
         }
     }
 
-    // 4. THE REDO LOGIC
-    function performRedo() {
-        if (redoStack.length > 0) {
-            // Grab the future state
-            const nextStateStr = redoStack.pop();
-            
-            // Put it back on the Undo stack
-            undoStack.push(nextStateStr);
-
+   
+    function redofun() {
+        if (redo.length > 0) {
+   
+        const nextStateStr = redo.pop();    
+   
+        undo.push(nextStateStr);
             const nextTasks = JSON.parse(nextStateStr);
-
-            // Update the store!
-            isNavigatingHistory = true;
+           history = true;
             store.setState({ tasks: nextTasks });
         }
     }

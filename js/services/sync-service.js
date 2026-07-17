@@ -4,37 +4,37 @@ import {apiClient } from './api-client.js'
 
 class SyncService {
     constructor() {
-        this.dbName = 'TaskMasterSyncDB';
+        this.dbName = 'Offlinedb';
         this.storeName = 'offlineQueue';
         this.db = null;
         this.isOnline = navigator.onLine;
         this.syncStatus = this.isOnline ? 'Online' : 'Offline';
     }
 
-    // Initialize IndexedDB queue and window listeners
+    
     async init() {
         await this.initIndexedDB();
-        this.setupListeners();
+        this.listenOnline();
         this.updateStatusDisplay(this.syncStatus);
-        await this.updateQueueDisplay();
+        await this.updatequeuedisplay();
     }
 
-    // Open or create the IndexedDB database
+    
     initIndexedDB() {
         return new Promise((resolve, reject) => {
-            const request = indexedDB.open(this.dbName, 1);
+            const req = indexedDB.open(this.dbName, 1);
 
-            request.onerror = () => {
-                console.error("IndexedDB error:", request.error);
-                reject(request.error);
+            req.onerror = () => {
+                console.error("IndexedDB error:", req.error);
+                reject(req.error);
             };
 
-            request.onsuccess = () => {
-                this.db = request.result;
+            req.onsuccess = () => {
+                this.db = req.result;
                 resolve(this.db);
             };
 
-            request.onupgradeneeded = (event) => {
+            req.onupgradeneeded = (event) => {
                 const db = event.target.result;
                 if (!db.objectStoreNames.contains(this.storeName)) {
                     db.createObjectStore(this.storeName, { keyPath: 'id', autoIncrement: true });
@@ -43,12 +43,12 @@ class SyncService {
         });
     }
 
-    // Listen for browser online/offline events
-    setupListeners() {
+    
+    listenOnline() {
         window.addEventListener('online', async () => {
             this.isOnline = true;
             
-            // 1. Instantly clear the offline toast!
+    
             eventBus.emit('notification:clear'); 
             
             this.updateStatusDisplay('Syncing...');
@@ -63,21 +63,21 @@ class SyncService {
             eventBus.emit('notification:show', {
                 message: 'You are offline. Changes are saved locally and queued.',
                 type: 'warning',
-                duration: 0 // 2. Duration 0 keeps it on screen until they reconnect!
+                duration: 0 
             });
         });
     }
 
-    // Push an operation into the IndexedDB queue when offline
+    
     async queueOperation(actionType, payload) {
         if (!this.db) await this.initIndexedDB();
 
         return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(this.storeName, 'readwrite');
-            const store = transaction.objectStore(this.storeName);
+            const trans = this.db.transaction(this.storeName, 'readwrite');
+            const store = trans.objectStore(this.storeName);
 
             const operation = {
-                actionType, // e.g., 'CREATE_TASK', 'UPDATE_TASK', 'DELETE_TASK'
+                actionType, 
                 payload,
                 timestamp: new Date().toISOString()
             };
@@ -85,7 +85,7 @@ class SyncService {
             const request = store.add(operation);
             
             request.onsuccess = async () => {
-                await this.updateQueueDisplay();
+                await this.updatequeuedisplay();
                 resolve(request.result);
             };
 
@@ -93,7 +93,7 @@ class SyncService {
         });
     }
 
-    // Replay queued operations when connectivity returns
+    
     async processQueue() {
         if (!this.db || !this.isOnline) return;
 
@@ -107,14 +107,10 @@ class SyncService {
 
         try {
             for (const op of operations) {
-                // 1. Send it to the server
-                await this.simulateServerSync(op);
-
-                // 2. ONLY if successful, delete it from the local offline queue
-                await this.removeOperation(op.id);
-                
-                // Update the visual log so the user sees it disappearing!
-                await this.updateQueueDisplay();
+               
+                await this.removetask(op.id);
+               
+                await this.updatequeuedisplay();
             }
 
             this.updateStatusDisplay('Synced');
@@ -134,13 +130,13 @@ class SyncService {
             console.error('Synchronization failed:', error);
             this.updateStatusDisplay('Sync Failed');
             eventBus.emit('sync:failed', error);
-            // Notice: We do NOT clear the queue here. We let the data stay safe in IndexedDB to try again later!
-
+          
+            
             if (this.isOnline) {
                 console.log("Server failed. Retrying sync in 5 seconds...");
                 
                 setTimeout(() => {
-                    // Change status back to syncing so the user knows it's trying again
+                
                     this.updateStatusDisplay('Syncing...'); 
                     this.processQueue();
                 }, 5000);
@@ -159,7 +155,7 @@ class SyncService {
         });
     }
 
-    removeOperation(id) {
+    removetask(id) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(this.storeName, 'readwrite');
             const store = transaction.objectStore(this.storeName);
@@ -170,38 +166,25 @@ class SyncService {
         });
     }
 
-    // Simulated network sync call
-    simulateServerSync(operation) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                // Simulate occasional random failure for testing resilience
-                if (Math.random() < 0.05) {
-                    reject(new Error('Server rejection during sync'));
-                } else {
-                    console.log('Server synced operation:', operation);
-                    resolve(true);
-                }
-            }, 800); // 800ms delay to simulate network travel time
-        });
-    }
-
+   
+ 
 
    // the below function will be used if we have the actual backend api link 
-
-  //  async simulateServerSync(operation) {
+/*
+    async simulateServerSync(operation) {
         
-      //  if (operation.actionType === 'CREATE_TASK') {
-    //        return await apiClient.post('/tasks', operation.payload);
-        //} 
-     //   else if (operation.actionType === 'UPDATE_TASK' || operation.actionType === 'MOVE_TASK') {
-       //     return await apiClient.put(`/tasks/${operation.payload.id}`, operation.payload);
-        //} 
-        //else if (operation.actionType === 'DELETE_TASK') {
-         //   return await apiClient.delete(`/tasks/${operation.payload.id}`);
-        ///}
-   // }
-
-    async updateQueueDisplay() {
+        if (operation.actionType === 'CREATE_TASK') {
+            return await apiClient.post('/tasks', operation.payload);
+    } 
+       else if (operation.actionType === 'UPDATE_TASK' || operation.actionType === 'MOVE_TASK') {
+          return await apiClient.put(`/tasks/${operation.payload.id}`, operation.payload);
+     } 
+     else if (operation.actionType === 'DELETE_TASK') {
+       return await apiClient.delete(`/tasks/${operation.payload.id}`);
+     }
+    }
+*/
+    async updatequeuedisplay() {
         const logContainer = document.getElementById('offline-queue-log');
         if (!logContainer) return;
 

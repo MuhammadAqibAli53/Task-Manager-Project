@@ -1,5 +1,5 @@
 
-const Sp = JSON.parse(localStorage.getItem('taskMasterPrefs')) || {};
+const Sp = JSON.parse(localStorage.getItem('savepref')) || {};
 
 
 let state = {
@@ -46,7 +46,7 @@ export const store = {
                 viewMode: state.viewMode,
                 theme: state.theme
             };
-            localStorage.setItem('taskMasterPrefs', JSON.stringify(preftosave));
+            localStorage.setItem('savepref', JSON.stringify(preftosave));
             
             
             Sub.forEach(

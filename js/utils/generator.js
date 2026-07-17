@@ -14,7 +14,7 @@ export function generatePerformanceTasks() {
     const today = new Date();
 
     for (let i = 0; i < 1000; i++) {
-        // Create random future/past dates for testing due date logic
+
         const randomDays = Math.floor(Math.random() * 30) - 10; 
         const dueDate = new Date(today);
         dueDate.setDate(today.getDate() + randomDays);
@@ -32,11 +32,11 @@ export function generatePerformanceTasks() {
         });
     }
 
-    // Grab current tasks and append the 1,000 new ones
+
     const currentTasks = store.getState().tasks;
     store.setState({ tasks: [...currentTasks, ...newTasks] });
     
-    // Trigger a success toast
+
     import('../core/event-bus.js').then(({ eventBus }) => {
         eventBus.emit('notification:show', {
             message: '1,000 tasks successfully generated!',
@@ -48,13 +48,10 @@ export function generatePerformanceTasks() {
 export function deletePerformanceTasks() {
     const currentTasks = store.getState().tasks;
     
-    // Filter out all tasks that have the 'perf-task-' prefix
     const realTasks = currentTasks.filter(task => !task.id.startsWith('perf-task-'));
     
-    // Update the store with ONLY the real tasks
     store.setState({ tasks: realTasks });
-    
-    // Trigger a success toast
+  
     import('../core/event-bus.js').then(({ eventBus }) => {
         eventBus.emit('notification:show', {
             message: 'All 1,000 performance tasks deleted!',
@@ -63,8 +60,6 @@ export function deletePerformanceTasks() {
     });
 }
 
-// Attach it to the window so you can run it from the console
-window.delete1000Tasks = deletePerformanceTasks;
 
-// Attach it to the global window object so you can trigger it from the browser console!
+window.delete1000Tasks = deletePerformanceTasks;
 window.generate1000Tasks = generatePerformanceTasks;
