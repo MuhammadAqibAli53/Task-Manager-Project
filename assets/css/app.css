@@ -37,7 +37,7 @@ button {
     min-width: 0;
 }
 
-/* brand */
+
 
 .brand {
     display: flex;
@@ -783,6 +783,8 @@ body[data-theme="dark"] {
     }
 }
 
+
+
 @media (max-width: 700px) {
     .layout {
         flex-direction: column;
@@ -823,5 +825,13 @@ body[data-theme="dark"] {
     .task-card {
         width: 100%; 
         min-width: 0;
+
+    }
+    .task-table th,
+    .task-table td
+    {
+     font-size: 10px;
+     max-width: 100%;
+     padding: 2.5px;
     }
 }
