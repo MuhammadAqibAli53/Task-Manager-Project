@@ -4,8 +4,11 @@ import { syncService } from '../../services/sync-service.js';
 
 export async function initTaskForm() {
     const newTaskBtn = document.getElementById('btn-new-task');
+   
     const dialog = document.getElementById('task-dialog');
+   
     const closeBtns = document.querySelectorAll('[data-close-dialog]');
+   
     const form = document.getElementById('task-form');
 
 
@@ -13,15 +16,19 @@ export async function initTaskForm() {
     if (assigneeSelect) {
         try {
             const response = await fetch('./data/users.json');
-            const users = await response.json();
+          
+               const users = await response.json();
             
 
-            assigneeSelect.innerHTML = '<option value="">Unassigned</option>'; 
+    assigneeSelect.innerHTML = '<option value="">Unassigned</option>'; 
             
             users.forEach(user => {
                 const option = document.createElement('option');
+             
                 option.value = user.name;
-                option.textContent = user.name;
+                
+                  option.textContent = user.name;
+               
                 assigneeSelect.appendChild(option);
             });
         } catch (error) {
@@ -34,8 +41,9 @@ export async function initTaskForm() {
         newTaskBtn.addEventListener('click', () => {
             form.reset();
             document.getElementById('task-id').value = '';
-            document.getElementById('task-dialog-title').textContent = 'New task';
-            document.getElementById('error-title').textContent = '';
+         document.getElementById('task-dialog-title').textContent = 'New task';
+            
+           document.getElementById('error-title').textContent = '';
             document.getElementById('error-date').textContent = '';
             dialog.showModal(); 
         });
@@ -43,17 +51,21 @@ export async function initTaskForm() {
 
     closeBtns.forEach(button => {
         button.addEventListener('click', () => {
+      
             dialog.close();
+      
         });
     });
 
 
     form.addEventListener('submit', async (event) => {
+
         event.preventDefault(); 
 
         const formData = new FormData(form);
+     
         const title = formData.get('title').trim();
-        const dueDate = formData.get('dueDate');
+         const dueDate = formData.get('dueDate');
         const today = new Date().toISOString().split('T')[0];
         
         const existingId = formData.get('task-id');
@@ -63,17 +75,17 @@ export async function initTaskForm() {
         document.getElementById('error-date').textContent = '';
         let isValid = true;
 
-        if (title.length < 3 || title.length > 100) {
+        if(title.length < 3 || title.length > 100) {
             document.getElementById('error-title').textContent = 'Title must be between 3 and 100 characters.';
             isValid = false;
         }
 
-        if (!existingId && dueDate && dueDate < today) {
+        if(!existingId && dueDate && dueDate < today) {
             document.getElementById('error-date').textContent = 'Due date cannot be in the past.';
             isValid = false;
         }
 
-        if (!isValid) return; 
+        if(!isValid) return; 
 
         const currentTasks = store.getState().tasks;
         let updatedTasks;

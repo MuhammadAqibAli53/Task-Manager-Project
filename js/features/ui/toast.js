@@ -19,11 +19,11 @@ export function initToastSystem() {
         const closeBtn = event.target.closest('.toast-close');
         
 
-        if (closeBtn) {
+        if(closeBtn) {
 
             const toastElement = closeBtn.closest('.toast');
             
-            if (toastElement) {
+            if(toastElement) {
 
 
                 toastElement.classList.remove('toast--visible');
